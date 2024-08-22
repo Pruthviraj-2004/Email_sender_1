@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,8 +27,7 @@ SECRET_KEY = "django-insecure-0&nb^edtaqsjj3l#p4q286oeyuw3^(dgayc0x#isx+&pl06#9p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['practicehost4.pythonanywhere.com','127.0.0.1']
 
 # Application definition
 
@@ -113,7 +113,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "/static/"
+# STATIC_URL = "/static/"
+STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -123,8 +125,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # EMAIL Related
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST_USER = 'photo2pruthvi@gmail.com'  # TODO: Your email
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_PASSWORD = 'rqgw ewkx ixes tuzk'  # TODO: Give APP Password here
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')  # Environment variable
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')  # Environment variable
 EMAIL_USE_TLS = True
