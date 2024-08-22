@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 0 auto;
+            font-family: Arial, sans-serif;
+        }
+        .card-header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .card-body {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .question {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .response-buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .response-button {
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            color: white;
+            background-color: #007bff;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            display: inline-block;
+            text-decoration: none;
+        }
+        .response-button.no {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="card-header">{{ title }}</div>
+        <div class="card-body">
+            {{ body }}
+            <p class="question">Will you attend the office tomorrow?</p>
+            <div class="response-buttons">
+                <a href="http://127.0.0.1:8000/api/confirm/response/{{ user_id }}/yes/" class="response-button">Yes</a>
+                <a href="http://127.0.0.1:8000/api/confirm/response/{{ user_id }}/no/" class="response-button no">No</a>
+            </div>            
+        </div>
+        <div class="card-footer">{{ sign }}</div>
+    </div>
+</body>
+</html>

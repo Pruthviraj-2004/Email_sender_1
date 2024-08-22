@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>View Responses</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>View Attendance Responses</h1>
+        <form method="post" class="form-group">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">View Responses</button>
+        </form>
+        {% if responses %}
+        <h2>Responses for {{ selected_date|date:"Y-m-d" }}:</h2>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="alert alert-success">Yes: {{ yes_count }}</div>
+            </div>
+            <div class="col-md-6">
+                <div class="alert alert-danger">No: {{ no_count }}</div>
+            </div>
+        </div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Response</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for response in responses %}
+                <tr>
+                    <td>{{ response.user.name }}</td>
+                    <td>{{ response.response | capfirst }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+        <a href="{% url 'control_panel' %}" class="btn btn-secondary mt-3">Back to Control Panel</a>
+
+    </div>
+</body>
+</html>

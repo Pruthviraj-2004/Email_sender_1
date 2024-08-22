@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Add User</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Add New User</h1>
+        <div class="alert alert-info" role="alert">
+            Fill in the details to add a new user.
+        </div>
+        <form method="post" class="form-group">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <a href="{% url 'control_panel' %}" class="btn btn-secondary mt-3">Back to Control Panel</a>
+
+    </div>
+</body>
+</html>

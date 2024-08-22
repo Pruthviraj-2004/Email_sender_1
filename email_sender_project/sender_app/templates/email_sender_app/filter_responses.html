@@ -1,0 +1,61 @@
+<!-- filter_responses.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Filter Responses</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Filter Responses</h1>
+        <form method="get" class="form-inline mb-3">
+            {% csrf_token %}
+            <div class="mr-2">
+                {{ form.user.label_tag }} {{ form.user }}
+            </div>
+            <div class="mr-2">
+                {{ form.date.label_tag }} {{ form.date }}
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+        {% if responses.exists %}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="alert alert-success">
+                    <strong>Yes Count:</strong> {{ yes_count }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="alert alert-danger">
+                    <strong>No Count:</strong> {{ no_count }}
+                </div>
+            </div>
+        </div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Date</th>
+                    <th>Response</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for response in responses %}
+                <tr>
+                    <td>{{ response.user.name }}</td>
+                    <td>{{ response.date }}</td>
+                    <td>{{ response.response }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No responses found.</p>
+        {% endif %}
+        <a href="{% url 'control_panel' %}" class="btn btn-secondary mt-3">Back to Control Panel</a>
+    </div>
+</body>
+</html>
