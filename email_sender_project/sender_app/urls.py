@@ -1,16 +1,15 @@
 from django.urls import path
-from .views import AttendanceResponseView, add_response, add_user, control_panel, filter_responses, index, send_emails, send_emails_to_all_users, view_responses, view_user_responses
+
+from .views import AddEmployeeResponseView, AddEmployeeView, ControlPanelView, EmployeeResponseView, FilterEmployeeResponses, SendConfirmationEmail, SendEmailsToAllEmployees, ViewEmployeeResponseByEmployee, ViewEmployeeResponses
 
 urlpatterns = [
-    # path('send-mail', views.index),
-    path('send-mail/<int:user_id>/', index, name='send_mail'),
-    path('confirm/response/<int:user_id>/<str:response_value>/', AttendanceResponseView.as_view(), name='confirm_response'),
-    path('add-user/', add_user, name='add_user'),
-    path('add-response/', add_response, name='add_response'),
-    path('view-responses/', view_responses, name='view_responses'),
-    path('control-panel/', control_panel, name='control_panel'),
-    path('send-emails/', send_emails, name='send_emails'),
-    path('view-user-responses/', view_user_responses, name='view_user_responses'),
-    path('filter-responses/', filter_responses, name='filter_responses'),
-
+    path('send-email/<int:employee_id>/', SendConfirmationEmail.as_view(), name='send_email'),
+    path('send-emails-to-all/', SendEmailsToAllEmployees.as_view(), name='send_emails_to_all'),
+    path('response/<int:employee_id>/<str:response_value>/', EmployeeResponseView.as_view(), name='employee_response'),
+    path('control-panel/', ControlPanelView.as_view(), name='control_panel'),
+    path('add-employee/', AddEmployeeView.as_view(), name='add_employee'),
+    path('add-employee-response/', AddEmployeeResponseView.as_view(), name='add_employee_response'),
+    path('view-responses/', ViewEmployeeResponses.as_view(), name='view_responses'),
+    path('view-responses-by-employee/', ViewEmployeeResponseByEmployee.as_view(), name='view_responses_by_employee'),
+    path('filter-responses/', FilterEmployeeResponses.as_view(), name='filter_responses'),    
 ]

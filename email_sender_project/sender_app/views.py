@@ -1,70 +1,70 @@
-from django.views import View
 from django.http import HttpResponse
 from django.core.mail import send_mail
 from django.template import loader
-from django.views import View
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from .models import User, AttendanceResponse
+from .models import Employee, EmployeeResponse
 from django.utils import timezone
 
 from django.shortcuts import render, redirect
-from .forms import DateForm, FilterResponseForm, UserForm, AttendanceResponseForm, UserSelectForm
-from .models import User
+from .forms import DateForm, EmployeeForm, EmployeeResponseForm, EmployeeSelectForm, FilterResponseForm
 from django.contrib import messages
+from django.views.generic import View, TemplateView
 
-def index(request, user_id):
-    user = get_object_or_404(User, pk=user_id)
-    html_message = loader.render_to_string(
-        'email_sender_app/message.html',
-        {
-            'title': 'Office Attendance Confirmation',
-            'body': f'Hello {user.name}, this email is to verify whether you will attend the office tomorrow. Please confirm your attendance.',
-            'sign': 'Your Manager',
-            'user_id': user.user_id,
-        })
-
-    send_mail(
-        'Will You Attend the Office Tomorrow?',
-        'Please confirm your attendance for tomorrow.',
-        'photo2pruthvi@gmail.com',  # Replace with your email address
-        [user.email],
-        html_message=html_message,
-        fail_silently=False,
-    )
-
-    return HttpResponse("Mail Sent!")
-
-def send_emails(request):
-    users = User.objects.all()
-    for user in users:
+class SendConfirmationEmail(View):
+    def get(self, request, employee_id):
+        employee = get_object_or_404(Employee, pk=employee_id)
         html_message = loader.render_to_string(
             'email_sender_app/message.html',
             {
                 'title': 'Office Attendance Confirmation',
-                'body': f'Hello {user.name}, this email is to verify whether you will attend the office tomorrow. Please confirm your attendance.',
+                'body': f'Hello {employee.name}, this email is to verify whether you will attend the office tomorrow. Please confirm your attendance.',
                 'sign': 'Your Manager',
-                'user_id': user.user_id,
+                'employee_id': employee.user_id,  # Assuming Employee model still uses `user_id` as its primary key
             })
 
         send_mail(
             'Will You Attend the Office Tomorrow?',
             'Please confirm your attendance for tomorrow.',
-            'photo2pruthvi@gmail.com',  # Replace with your actual sender email address
-            [user.email],
+            'photo2pruthvi@gmail.com',  # Replace with your email address
+            [employee.email],
             html_message=html_message,
             fail_silently=False,
         )
-    messages.success(request, 'Emails have been successfully sent to all users.')
-    return redirect('control_panel')
 
-class AttendanceResponseView(View):
-    def get(self, request, user_id, response_value):
-        user = get_object_or_404(User, pk=user_id)
+        return HttpResponse("Mail Sent!")
+
+class SendEmailsToAllEmployees(View):
+    def get(self, request):
+        employees = Employee.objects.all()
+        for employee in employees:
+            html_message = loader.render_to_string(
+                'email_sender_app/message.html',
+                {
+                    'title': 'Office Attendance Confirmation',
+                    'body': f'Hello {employee.name}, this email is to verify whether you will attend the office tomorrow. Please confirm your attendance.',
+                    'sign': 'Your Manager',
+                    'employee_id': employee.user_id,  # Assuming Employee model still uses `user_id`
+                })
+
+            send_mail(
+                'Will You Attend the Office Tomorrow?',
+                'Please confirm your attendance for tomorrow.',
+                'photo2pruthvi@gmail.com',  # Replace with your actual sender email address
+                [employee.email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+        messages.success(request, 'Emails have been successfully sent to all employees.')
+        return redirect('control_panel')
+
+class EmployeeResponseView(View):
+    def get(self, request, employee_id, response_value):
+        employee = get_object_or_404(Employee, pk=employee_id)
         
         if response_value in ['yes', 'no']:
-            response, created = AttendanceResponse.objects.get_or_create(
-                user=user,
+            response, created = EmployeeResponse.objects.get_or_create(
+                employee=employee,
                 date=timezone.now().date(),
                 defaults={'response': response_value}
             )
@@ -72,7 +72,7 @@ class AttendanceResponseView(View):
                 response.response = response_value
                 response.save()
 
-            return HttpResponse(f"Thank you, {user.name}, for your response!")
+            return HttpResponse(f"Thank you, {employee.name}, for your response!")
 
         return HttpResponse("Invalid response.", status=400)
 
@@ -81,33 +81,32 @@ import time
 import threading
 from django.core.mail import send_mail
 from django.template import loader
-from .models import User
 
 scheduler_thread = None  # Global variable to track if the scheduler is running
 
 def send_emails_to_all_users():
-    users = User.objects.all()
-    for user in users:
+    employees = Employee.objects.all()
+    for employee in employees:
         html_message = loader.render_to_string(
             'email_sender_app/message.html',
             {
                 'title': 'Office Attendance Confirmation',
-                'body': f'Hello {user.name}, this email is to verify whether you will attend the office tomorrow. Please confirm your attendance.',
+                'body': f'Hello {employee.name}, this email is to verify whether you will attend the office tomorrow. Please confirm your attendance.',
                 'sign': 'Your Manager',
-                'user_id': user.user_id,
+                'employee_id': employee.user_id,  # Assuming Employee model still uses `user_id`
             })
 
         send_mail(
             'Will You Attend the Office Tomorrow?',
             'Please confirm your attendance for tomorrow.',
             'photo2pruthvi@gmail.com',  # Replace with your email address
-            [user.email],
+            [employee.email],
             html_message=html_message,
             fail_silently=False,
         )
 
 def start_scheduler():
-    schedule.every().day.at("19:28").do(send_emails_to_all_users)
+    schedule.every().day.at("00:15").do(send_emails_to_all_users)
 
     while True:
         schedule.run_pending()
@@ -123,35 +122,41 @@ def start_scheduler_thread():
 # Start the scheduler thread
 start_scheduler_thread()
 
-def control_panel(request):
-    return render(request, 'email_sender_app/control_panel.html')
+class ControlPanelView(TemplateView):
+    template_name = 'email_sender_app/control_panel.html'
 
-def add_user(request):
-    if request.method == 'POST':
-        form = UserForm(request.POST)
+class AddEmployeeView(View):
+    def get(self, request):
+        form = EmployeeForm()
+        return render(request, 'email_sender_app/add_user.html', {'form': form})
+
+    def post(self, request):
+        form = EmployeeForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('add_user')
-    else:
-        form = UserForm()
-    return render(request, 'email_sender_app/add_user.html', {'form': form})
+            return redirect('add_employee')
 
-def add_response(request):
-    if request.method == 'POST':
-        form = AttendanceResponseForm(request.POST)
+class AddEmployeeResponseView(View):
+    def get(self, request):
+        form = EmployeeResponseForm()
+        return render(request, 'email_sender_app/add_response.html', {'form': form})
+
+    def post(self, request):
+        form = EmployeeResponseForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('add_response')
-    else:
-        form = AttendanceResponseForm()
-    return render(request, 'email_sender_app/add_response.html', {'form': form})
+            return redirect('add_employee_response')
 
-def view_responses(request):
-    if request.method == 'POST':
+class ViewEmployeeResponses(View):
+    def get(self, request):
+        form = DateForm()
+        return render(request, 'email_sender_app/view_responses.html', {'form': form})
+
+    def post(self, request):
         form = DateForm(request.POST)
         if form.is_valid():
             selected_date = form.cleaned_data['date']
-            responses = AttendanceResponse.objects.filter(date=selected_date)
+            responses = EmployeeResponse.objects.filter(date=selected_date)
             yes_count = responses.filter(response='yes').count()
             no_count = responses.filter(response='no').count()
             return render(request, 'email_sender_app/view_responses.html', {
@@ -161,40 +166,48 @@ def view_responses(request):
                 'no_count': no_count,
                 'selected_date': selected_date
             })
-    else:
-        form = DateForm()
-    return render(request, 'email_sender_app/view_responses.html', {'form': form})
 
-def view_user_responses(request):
-    form = UserSelectForm(request.POST or None)
-    responses = None
-    if request.method == 'POST' and form.is_valid():
-        user = form.cleaned_data['user']
-        responses = AttendanceResponse.objects.filter(user=user).order_by('-date')
-    return render(request, 'email_sender_app/view_user_responses.html', {
-        'form': form,
-        'responses': responses,
-        'selected_user': form.cleaned_data['user'] if responses else None
-    })
+class ViewEmployeeResponseByEmployee(View):
+    def get(self, request):
+        form = EmployeeSelectForm()
+        return render(request, 'email_sender_app/view_user_responses.html', {'form': form})
 
-def filter_responses(request):
-    form = FilterResponseForm(request.GET or None)
-    responses = AttendanceResponse.objects.all()
+    def post(self, request):
+        form = EmployeeSelectForm(request.POST)
+        responses = None
+        if form.is_valid():
+            employee = form.cleaned_data['employee']
+            responses = EmployeeResponse.objects.filter(employee=employee).order_by('-date')
+            return render(request, 'email_sender_app/view_user_responses.html', {
+                'form': form,
+                'responses': responses,
+                'selected_user': employee
+            })
+    
+class FilterEmployeeResponses(View):
+    def get(self, request):
+        form = FilterResponseForm(request.GET or None)
+        responses = EmployeeResponse.objects.all()
+        yes_count = no_count = 0
 
-    yes_count = no_count = 0
+        if form.is_valid():
+            employee = form.cleaned_data.get('employee')
+            date = form.cleaned_data.get('date', timezone.localdate())
+            if employee:
+                responses = responses.filter(employee=employee)
+            responses = responses.filter(date=date)
+            yes_count = responses.filter(response='yes').count()
+            no_count = responses.filter(response='no').count()
 
-    if request.GET and form.is_valid():
-        if form.cleaned_data['user']:
-            responses = responses.filter(user=form.cleaned_data['user'])
-        if form.cleaned_data['date']:
-            responses = responses.filter(date=form.cleaned_data['date'])
+        else:
+            # If form is not valid, show today's responses by default
+            responses = responses.filter(date=timezone.localdate())
+            yes_count = responses.filter(response='yes').count()
+            no_count = responses.filter(response='no').count()
 
-        yes_count = responses.filter(response='yes').count()
-        no_count = responses.filter(response='no').count()
-
-    return render(request, 'email_sender_app/filter_responses.html', {
-        'form': form,
-        'responses': responses,
-        'yes_count': yes_count,
-        'no_count': no_count
-    })
+        return render(request, 'email_sender_app/filter_responses.html', {
+            'form': form,
+            'responses': responses,
+            'yes_count': yes_count,
+            'no_count': no_count
+        })

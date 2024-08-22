@@ -1,28 +1,28 @@
 # forms.py
+    
 from django import forms
 from django.utils import timezone
-from .models import AttendanceResponse, User
+from .models import EmployeeResponse, Employee
 
-class AttendanceResponseForm(forms.ModelForm):
+class EmployeeResponseForm(forms.ModelForm):
     class Meta:
-        model = AttendanceResponse
-        fields = ['user', 'date', 'response']
+        model = EmployeeResponse
+        fields = ['employee', 'date', 'response']
         widgets = {
             'date': forms.DateInput(format=('%Y-%m-%d'), attrs={'type': 'date', 'value': timezone.localdate()}),
         }
 
-class UserForm(forms.ModelForm):
+class EmployeeForm(forms.ModelForm):
     class Meta:
-        model = User
+        model = Employee
         fields = ['name', 'email']
 
 class DateForm(forms.Form):
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'value': timezone.localdate()}))
 
-class UserSelectForm(forms.Form):
-    user = forms.ModelChoiceField(queryset=User.objects.all().order_by('name'), label="Select User", empty_label="Choose...")
+class EmployeeSelectForm(forms.Form):
+    employee = forms.ModelChoiceField(queryset=Employee.objects.all().order_by('name'), label="Select Employee", empty_label="Choose...")
 
 class FilterResponseForm(forms.Form):
-    user = forms.ModelChoiceField(queryset=User.objects.all().order_by('name'), required=False, label="Select User", empty_label="All Users")
+    employee = forms.ModelChoiceField(queryset=Employee.objects.all().order_by('name'), required=False, label="Select Employee", empty_label="All Employees")
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False, label="Select Date")
-    
