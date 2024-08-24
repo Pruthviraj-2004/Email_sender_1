@@ -6,11 +6,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <title>View User Responses</title>
+    <title>View Employee Responses</title>
 </head>
 <body>
     <div class="container mt-5">
-        <h1>View Responses by User</h1>
+        <h1>View Responses by Employee</h1>
         <form method="post" class="mb-4">
             {% csrf_token %}
             {{ form.as_p }}
@@ -36,7 +36,7 @@
         </table>
         {% else %}
             {% if selected_user %}
-                <p>No responses found for this user.</p>
+                <p>No responses found for this Employee.</p>
             {% endif %}
         {% endif %}
         <a href="{% url 'control_panel' %}" class="btn btn-secondary mt-3">Back to Control Panel</a>

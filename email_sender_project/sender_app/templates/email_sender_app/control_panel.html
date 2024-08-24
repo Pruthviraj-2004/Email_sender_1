@@ -1,4 +1,4 @@
-<!-- control_panel.html -->
+{% comment %} <!-- control_panel.html -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -28,6 +28,58 @@
             {% endfor %}
         {% endif %}
 
+    </div>
+</body>
+</html> {% endcomment %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Control Panel</title>
+</head>
+<body>
+    <div class="container mt-5">
+
+        <!-- Messages Section -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <h1>Control Panel</h1>
+        
+        <!-- Addition Section -->
+        <div class="mt-4 mb-5">
+            <h2>Add Records</h2>
+            <div class="list-group">
+                <a href="{% url 'add_employee' %}" class="list-group-item list-group-item-action">Add Employee</a>
+                <a href="{% url 'add_employee_response' %}" class="list-group-item list-group-item-action">Add Employee Response</a>
+            </div>
+        </div>
+        
+        <!-- Viewing Responses Section -->
+        <div class="mt-4 mb-5">
+            <h2>View Responses</h2>
+            <div class="list-group">
+                <a href="{% url 'view_responses' %}" class="list-group-item list-group-item-action">View Responses (Date)</a>
+                <a href="{% url 'view_responses_by_employee' %}" class="list-group-item list-group-item-action">View Responses (Employee)</a>
+                <a href="{% url 'filter_responses' %}" class="list-group-item list-group-item-action">Filtered Responses</a>
+            </div>
+        </div>
+
+        <!-- Sending Emails Section -->
+        <div class="mt-4 mb-5">
+            <h2>Send Emails</h2>
+            <div class="list-group">
+                <a href="{% url 'send_emails_to_all' %}" class="list-group-item list-group-item-action">Send Emails to All</a>
+            </div>
+        </div>
     </div>
 </body>
 </html>

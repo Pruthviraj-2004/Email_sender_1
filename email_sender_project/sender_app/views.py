@@ -20,7 +20,7 @@ class SendConfirmationEmail(View):
                 'title': 'Office Attendance Confirmation',
                 'body': f'Hello {employee.name}, this email is to verify whether you will attend the office tomorrow. Please confirm your attendance.',
                 'sign': 'Your Manager',
-                'employee_id': employee.user_id,  # Assuming Employee model still uses `user_id` as its primary key
+                'employee_id': employee.user_id,
             })
 
         send_mail(
@@ -36,6 +36,7 @@ class SendConfirmationEmail(View):
 
 class SendEmailsToAllEmployees(View):
     def get(self, request):
+        tomorrow = timezone.now().date() + timezone.timedelta(days=1)
         employees = Employee.objects.all()
         for employee in employees:
             html_message = loader.render_to_string(
@@ -44,7 +45,8 @@ class SendEmailsToAllEmployees(View):
                     'title': 'Office Attendance Confirmation',
                     'body': f'Hello {employee.name}, this email is to verify whether you will attend the office tomorrow. Please confirm your attendance.',
                     'sign': 'Your Manager',
-                    'employee_id': employee.user_id,  # Assuming Employee model still uses `user_id`
+                    'employee_id': employee.user_id,
+                    'date': tomorrow ,
                 })
 
             send_mail(
@@ -61,11 +63,12 @@ class SendEmailsToAllEmployees(View):
 class EmployeeResponseView(View):
     def get(self, request, employee_id, response_value):
         employee = get_object_or_404(Employee, pk=employee_id)
+        tomorrow = timezone.now().date() + timezone.timedelta(days=1)
         
         if response_value in ['yes', 'no']:
             response, created = EmployeeResponse.objects.get_or_create(
                 employee=employee,
-                date=timezone.now().date(),
+                date=tomorrow,
                 defaults={'response': response_value}
             )
             if not created:
@@ -82,9 +85,10 @@ import threading
 from django.core.mail import send_mail
 from django.template import loader
 
-scheduler_thread = None  # Global variable to track if the scheduler is running
+scheduler_thread = None
 
 def send_emails_to_all_users():
+    tomorrow = timezone.now().date() + timezone.timedelta(days=1)
     employees = Employee.objects.all()
     for employee in employees:
         html_message = loader.render_to_string(
@@ -93,7 +97,8 @@ def send_emails_to_all_users():
                 'title': 'Office Attendance Confirmation',
                 'body': f'Hello {employee.name}, this email is to verify whether you will attend the office tomorrow. Please confirm your attendance.',
                 'sign': 'Your Manager',
-                'employee_id': employee.user_id,  # Assuming Employee model still uses `user_id`
+                'employee_id': employee.user_id,
+                'date': tomorrow ,
             })
 
         send_mail(
@@ -106,7 +111,7 @@ def send_emails_to_all_users():
         )
 
 def start_scheduler():
-    schedule.every().day.at("00:15").do(send_emails_to_all_users)
+    schedule.every().day.at("14:05").do(send_emails_to_all_users)
 
     while True:
         schedule.run_pending()
