@@ -1,3 +1,4 @@
+from calendar import month_name
 from django.http import HttpResponse
 from django.core.mail import send_mail
 from django.template import loader
@@ -111,7 +112,7 @@ def send_emails_to_all_users():
         )
 
 def start_scheduler():
-    schedule.every().day.at("14:05").do(send_emails_to_all_users)
+    schedule.every().day.at("14:25").do(send_emails_to_all_users)
 
     while True:
         schedule.run_pending()
@@ -215,4 +216,40 @@ class FilterEmployeeResponses(View):
             'responses': responses,
             'yes_count': yes_count,
             'no_count': no_count
+        })
+
+from django.db.models import Count
+from django.db.models.functions import TruncDay
+
+class ViewResponsesByMonth(View):
+    template_name = 'email_sender_app/view_responses_month.html'
+
+    def get(self, request):
+        # Get the current month if no month is explicitly selected
+        current_month = timezone.now().strftime('%m')
+        month = request.GET.get('month', current_month)
+        responses_data = {}
+        month_name_str = ""
+
+        # Generate months range for the dropdown
+        months = [{'number': i, 'name': month_name[i]} for i in range(1, 13)]
+
+        if month:
+            # Convert month to int and get the full month name for the selected month
+            month_index = int(month)
+            month_name_str = month_name[month_index]
+
+            # Filter responses by the selected month and count per day
+            responses_data = (EmployeeResponse.objects
+                              .filter(date__month=month, date__year=timezone.now().year)  # Ensuring it filters by the current year
+                              .annotate(day=TruncDay('date'))
+                              .values('day')
+                              .annotate(count=Count('id'))
+                              .order_by('day'))
+
+        return render(request, self.template_name, {
+            'months': months,
+            'responses': responses_data,
+            'month_name': month_name_str,
+            'selected_month': month
         })

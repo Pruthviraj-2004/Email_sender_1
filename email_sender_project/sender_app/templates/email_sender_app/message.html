@@ -55,14 +55,16 @@
         <div class="card-body">
             {{ body }}
             <p class="question">Will you attend the office on {{ date }}?</p>
-            {% comment %} <div class="response-buttons">
+            <div class="response-buttons">
                 <a href="https://practicehost4.pythonanywhere.com/api/response/{{ employee_id }}/yes/" class="response-button">Yes</a>
                 <a href="https://practicehost4.pythonanywhere.com/api/response/{{ employee_id }}/no/" class="response-button no">No</a>
-            </div> {% endcomment %}
+            </div>
+            {% comment %}
             <div class="response-buttons">
                 <a href="http://127.0.0.1:8000/api/response/{{ employee_id }}/yes/" class="response-button">Yes</a>
                 <a href="http://127.0.0.1:8000/api/response/{{ employee_id }}/no/" class="response-button no">No</a>
             </div>
+            {% endcomment %}
         </div>
         <div class="card-footer">{{ sign }}</div>
     </div>

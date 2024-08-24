@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import AddEmployeeResponseView, AddEmployeeView, ControlPanelView, EmployeeResponseView, FilterEmployeeResponses, SendConfirmationEmail, SendEmailsToAllEmployees, ViewEmployeeResponseByEmployee, ViewEmployeeResponses
+from .views import AddEmployeeResponseView, AddEmployeeView, ControlPanelView, EmployeeResponseView, FilterEmployeeResponses, SendConfirmationEmail, SendEmailsToAllEmployees, ViewEmployeeResponseByEmployee, ViewEmployeeResponses, ViewResponsesByMonth
 
 urlpatterns = [
     path('send-email/<int:employee_id>/', SendConfirmationEmail.as_view(), name='send_email'),
@@ -12,4 +12,5 @@ urlpatterns = [
     path('view-responses/', ViewEmployeeResponses.as_view(), name='view_responses'),
     path('view-responses-by-employee/', ViewEmployeeResponseByEmployee.as_view(), name='view_responses_by_employee'),
     path('filter-responses/', FilterEmployeeResponses.as_view(), name='filter_responses'),    
+    path('view-responses-month/', ViewResponsesByMonth.as_view(), name='view_responses_month'),
 ]

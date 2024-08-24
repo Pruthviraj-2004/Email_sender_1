@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>View Responses (Month)</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>View Responses (Month)</h1>
+        <form action="{% url 'view_responses_month' %}" method="get" class="form-inline mb-4">
+            <label for="monthSelect" class="mr-2">Select Month:</label>
+            <select id="monthSelect" name="month" class="form-control mr-2">
+                {% for month in months %}
+                <option value="{{ month.number|stringformat:"02d" }}" {% if month.number|stringformat:"02d" == selected_month %}selected{% endif %}>
+                    {{ month.name }}
+                </option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary">Show Responses</button>
+        </form>
+        
+        {% if month_name %}
+            <h2>Responses for {{ month_name }}</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Number of Responses</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for response in responses %}
+                    <tr>
+                        <td>{{ response.day }}</td>
+                        <td>{{ response.count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Please select a month to view responses.</p>
+        {% endif %}
+        <a href="{% url 'control_panel' %}" class="btn btn-secondary mt-3">Back to Control Panel</a>
+
+    </div>
+</body>
+</html>
