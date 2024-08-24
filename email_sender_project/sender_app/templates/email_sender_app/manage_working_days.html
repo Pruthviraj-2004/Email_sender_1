@@ -1,0 +1,293 @@
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Manage Working Days</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        form {
+            background-color: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .container {
+            background-color: #f4f7fa;
+            padding: 20px;
+        }
+        .form-inline {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .form-control, .btn {
+            margin-right: 10px;
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'control_panel' %}" class="btn btn-secondary mt-3">Back to Control Panel</a>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <h1>Manage Working Days</h1>
+        <form id="workingDaysForm" method="post" action="">
+            {% csrf_token %}
+            <div class="form-inline">
+                <label for="monthSelect" class="mr-2">Select Month:</label>
+                <select id="monthSelect" name="month" class="form-control" onchange="generateDays()">
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+                <label for="yearSelect" class="mr-2">Year:</label>
+                <input type="number" id="yearSelect" name="year" class="form-control" value="2024" min="2000" max="2100" onchange="generateDays()">
+                <button type="submit" class="btn btn-primary">Save Working Days</button>
+            </div>
+        </form>
+        <div id="daysContainer"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("monthSelect").value = new Date().getMonth() + 1;
+            document.getElementById("yearSelect").value = new Date().getFullYear();
+            generateDays();
+
+            document.getElementById("workingDaysForm").onsubmit = function(event) {
+                event.preventDefault();
+                submitDays();
+            };
+        });
+
+        function generateDays() {
+            var month = document.getElementById('monthSelect').value;
+            var year = document.getElementById('yearSelect').value;
+            var daysInMonth = new Date(year, month, 0).getDate();
+            var table = document.createElement('table');
+            table.innerHTML = '<tr><th>Date</th><th>Day</th><th>Working?</th></tr>';
+
+            for (var day = 1; day <= daysInMonth; day++) {
+                var date = new Date(year, month - 1, day);
+                var row = table.insertRow(-1);
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                var cell3 = row.insertCell(2);
+
+                cell1.innerHTML = day;
+                cell2.innerHTML = date.toLocaleString('en-us', {weekday: 'long'});
+                cell3.innerHTML = '<input type="checkbox" name="days" value="' + day + '"' +
+                                  (date.getDay() === 6 || date.getDay() === 0 ? '' : ' checked') + '>';
+            }
+
+            var container = document.getElementById('daysContainer');
+            container.innerHTML = '';
+            container.appendChild(table);
+        }
+
+        function submitDays() {
+            var checkboxes = document.querySelectorAll('input[name="days"]:checked');
+            var days = Array.from(checkboxes).map(el => parseInt(el.value));
+            var data = {
+                month: document.getElementById('monthSelect').value,
+                year: document.getElementById('yearSelect').value,
+                days: days
+            };
+            console.log(data);
+            fetch('http://127.0.0.1:8000/api/manage-working-days/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => alert('Data submitted successfully!'))
+            .catch(error => alert('Error: ' + error));
+        }
+    </script>
+</body>
+</html> {% endcomment %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Manage Working Days</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            margin: 40px auto;
+        }
+        h1 {
+            color: #000;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .form-inline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .form-control, .btn {
+            margin-right: 10px;
+            min-width: 200px;
+        }
+        .btn-secondary {
+            margin-top: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'control_panel' %}" class="btn btn-secondary">Back to Control Panel</a>
+        <h1>Manage Working Days</h1>
+        <form id="workingDaysForm" method="post" action="">
+            {% csrf_token %}
+            <div class="form-inline">
+                <label for="monthSelect" class="mr-2">Select Month:</label>
+                <select id="monthSelect" name="month" class="form-control" onchange="generateDays()">
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+                <label for="yearSelect" class="mr-2">Year:</label>
+                <input type="number" id="yearSelect" name="year" class="form-control" value="2024" min="2000" max="2100" onchange="generateDays()">
+                <button type="submit" class="btn btn-primary">Save Working Days</button>
+            </div>
+        </form>
+        <div id="daysContainer"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("monthSelect").value = new Date().getMonth() + 1;
+            document.getElementById("yearSelect").value = new Date().getFullYear();
+            generateDays();
+
+            document.getElementById("workingDaysForm").onsubmit = function(event) {
+                event.preventDefault();
+                submitDays();
+            };
+        });
+
+        function generateDays() {
+            var month = document.getElementById('monthSelect').value;
+            var year = document.getElementById('yearSelect').value;
+            var daysInMonth = new Date(year, month, 0).getDate();
+            var table = document.createElement('table');
+            table.innerHTML = '<tr><th>Date</th><th>Day</th><th>Working?</th></tr>';
+
+            for (var day = 1; day <= daysInMonth; day++) {
+                var date = new Date(year, month - 1, day);
+                var row = table.insertRow(-1);
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                var cell3 = row.insertCell(2);
+
+                cell1.innerHTML = day;
+                cell2.innerHTML = date.toLocaleString('en-us', {weekday: 'long'});
+                cell3.innerHTML = '<input type="checkbox" name="days" value="' + day + '"' +
+                                  (date.getDay() === 6 || date.getDay() === 0 ? '' : ' checked') + '>';
+            }
+
+            var container = document.getElementById('daysContainer');
+            container.innerHTML = '';
+            container.appendChild(table);
+        }
+
+        function submitDays() {
+            var checkboxes = document.querySelectorAll('input[name="days"]:checked');
+            var days = Array.from(checkboxes).map(el => parseInt(el.value));
+            var data = {
+                month: document.getElementById('monthSelect').value,
+                year: document.getElementById('yearSelect').value,
+                days: days
+            };
+            console.log(data);
+            fetch('http://127.0.0.1:8000/api/manage-working-days/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => alert('Data submitted successfully!'))
+            .catch(error => alert('Error: ' + error));
+        }
+    </script>
+</body>
+</html>

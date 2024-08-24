@@ -6,22 +6,63 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <title>Add Employee Response</title>
     <style>
-        .form-control { margin-bottom: 10px; }
+        body {
+            background-color: #f8f9fa;  /* Light gray background for the whole page */
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-top: 20px; /* Top margin for spacing */
+            margin-bottom: 40px; /* Increased bottom margin for extra space */
+        }
+        h1 {
+            color: #333; /* Neutral color for header, non-blue */
+            margin-bottom: 20px; /* Space below header */
+        }
+        .form-group {
+            margin-bottom: 15px; /* Spacing below each form group for clarity */
+        }
+        .form-control {
+            margin-bottom: 10px; /* Spacing below form elements */
+            border-radius: 0.25rem; /* Rounded borders for form elements */
+        }
+        .btn-primary, .btn-secondary {
+            margin-top: 20px; /* Space above buttons for separation */
+        }
+        .alert-info {
+            margin-bottom: 20px; /* Space below alert box */
+        }
     </style>
 </head>
 <body>
     <div class="container mt-5">
+        <a href="{% url 'control_panel' %}" class="btn btn-secondary mb-3">Back to Control Panel</a>
         <h1>Add Employee Response</h1>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
         <div class="alert alert-info" role="alert">
-            Select a Employee and date, then confirm their attendance.
+            Select an employee and date, then confirm their attendance.
         </div>
         <form method="post" class="form-group">
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
-        <a href="{% url 'control_panel' %}" class="btn btn-secondary mt-3">Back to Control Panel</a>
-
     </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
