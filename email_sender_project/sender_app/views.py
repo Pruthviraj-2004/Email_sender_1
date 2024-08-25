@@ -206,6 +206,18 @@ start_scheduler_thread()
 class ControlPanelView(TemplateView):
     template_name = 'email_sender_app/control_panel.html'
 
+class EmployeeListView(View):
+    def get(self, request):
+        employees = Employee.objects.all()
+        return render(request, 'email_sender_app/employees.html', {'employees': employees})
+
+from django.views.generic import ListView
+    
+class EmployeeResponsesView(View):
+    def get(self, request):
+        responses = EmployeeResponse.objects.all().select_related('employee').order_by('-date')
+        return render(request, 'email_sender_app/employees_responses.html', {'responses': responses})
+    
 class AddEmployeeView(View):
     def get(self, request):
         form = EmployeeForm()

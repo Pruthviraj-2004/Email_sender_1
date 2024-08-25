@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Responses</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa; /* Light gray background for overall comfort */
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 40px; /* Additional top margin for aesthetic spacing */
+            margin-bottom: 40px; /* Additional bottom margin for aesthetic spacing */
+        }
+        h1 {
+            color: #333; /* Neutral dark color for the header */
+            margin-bottom: 20px; /* Space below the header */
+        }
+        .scrollable-table {
+            overflow-y: auto;
+            height: 400px; /* Set height for scrollable area */
+        }
+        .table {
+            margin-top: 20px; /* Space above the table */
+        }
+        .btn-space {
+            margin-right: 10px; /* Right margin for spacing between buttons */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Employee Responses</h1>
+        <div class="mb-3">
+            <a href="{% url 'control_panel' %}" class="btn btn-secondary btn-space">Back to Control Panel</a>
+            <a href="{% url 'add_employee_response' %}" class="btn btn-primary">Add Employee Response</a>
+        </div>
+        <div class="scrollable-table">
+            <table class="table">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Date</th>
+                        <th>Response</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for response in responses %}
+                    <tr>
+                        <td>{{ response.employee.name }}</td>
+                        <td>{{ response.date }}</td>
+                        <td>{{ response.response }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
