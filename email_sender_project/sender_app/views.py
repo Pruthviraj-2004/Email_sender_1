@@ -318,6 +318,7 @@ class FilterEmployeeResponses(View):
             'yes_count': yes_count,
             'no_count': no_count
         })
+from django.db.models import Count, Case, When, IntegerField
 
 class ViewResponsesByMonth(View):
     template_name = 'email_sender_app/view_responses_month.html'
@@ -340,7 +341,11 @@ class ViewResponsesByMonth(View):
                               .filter(date__month=month, date__year=timezone.now().year)
                               .annotate(day=TruncDay('date'))
                               .values('day')
-                              .annotate(count=Count('id'))
+                              .annotate(
+                                  total=Count('id'),
+                                  yes_count=Count(Case(When(response='yes', then=1), output_field=IntegerField())),
+                                  no_count=Count(Case(When(response='no', then=1), output_field=IntegerField()))
+                              )
                               .order_by('day'))
 
             messages.success(request, f"Displaying responses for {month_name_str}.")

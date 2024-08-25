@@ -76,14 +76,18 @@
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Number of Responses</th>
+                        <th>Total Responses</th>
+                        <th>Yes Count</th>
+                        <th>No Count</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for response in responses %}
                     <tr>
-                        <td>{{ response.day }}</td>
-                        <td>{{ response.count }}</td>
+                        <td>{{ response.day|date:"M d, Y (l)" }}</td>
+                        <td>{{ response.total }}</td>
+                        <td>{{ response.yes_count }}</td>
+                        <td>{{ response.no_count }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
