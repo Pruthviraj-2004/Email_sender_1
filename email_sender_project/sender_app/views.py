@@ -25,6 +25,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from datetime import datetime
 
+from django.db.models import Count, Case, When, IntegerField
+
+from tablib import Dataset
+from .resources import EmployeeResource
 
 class SendConfirmationEmail(View):
     def get(self, request, employee_id):
@@ -330,7 +334,6 @@ class FilterEmployeeResponses(View):
             'yes_count': yes_count,
             'no_count': no_count
         })
-from django.db.models import Count, Case, When, IntegerField
 
 class ViewResponsesByMonth(View):
     template_name = 'email_sender_app/view_responses_month.html'
@@ -455,3 +458,86 @@ class SelectMonthYearView(View):
             'current_year': current_year,
             'current_month': current_month
         })
+
+class UploadFileView(View):
+    def get(self, request):
+        return render(request, 'email_sender_app/upload.html')
+
+    def post(self, request):
+        if 'file' in request.FILES:
+            new_employees = request.FILES['file']
+            file_extension = new_employees.name.split('.')[-1].lower()
+
+            # Check if the file format is CSV or Excel
+            if file_extension not in ['csv', 'xls', 'xlsx']:
+                messages.error(request, 'Invalid file format. Please upload a .csv or .xls/.xlsx file.')
+                return redirect('upload_file')
+
+            try:
+                dataset = Dataset()
+
+                # Handle CSV files
+                if file_extension == 'csv':
+                    imported_data = dataset.load(new_employees.read().decode('utf-8'), format='csv')
+                # Handle Excel files (xls and xlsx)
+                elif file_extension == 'xls':
+                    # Use openpyxl to read Excel files
+                    imported_data = dataset.load(new_employees.read(), format='xls')
+                elif file_extension == 'xlsx':
+                    imported_data = dataset.load(new_employees.read(), format='xlsx')
+
+                employee_resource = EmployeeResource()
+                result = employee_resource.import_data(dataset, dry_run=True)  # Test the data import
+
+                if not result.has_errors():
+                    employee_resource.import_data(dataset, dry_run=False)  # Actually import now
+                    messages.success(request, 'Employees imported successfully!')
+                else:
+                    messages.error(request, 'Import failed. Please check the data format.')
+
+            except Exception as e:
+                messages.error(request, f'An error occurred: {str(e)}')
+
+            return redirect('upload_file')
+
+        messages.error(request, 'No file was provided.')
+        return redirect('upload_file')
+
+class EmployeeExportView(View):
+    def get(self, request, *args, **kwargs):
+        # Create an instance of EmployeeResource
+        employee_resource = EmployeeResource()
+        
+        # Query all employees
+        queryset = Employee.objects.all()
+        
+        # Use the export method to get the dataset
+        dataset = employee_resource.export(queryset)
+        
+        # Choose the export format (e.g., CSV)
+        export_format = request.GET.get('format', 'csv')
+        
+        if export_format == 'csv':
+            content_type = 'text/csv'
+            response = HttpResponse(dataset.csv, content_type=content_type)
+            response['Content-Disposition'] = 'attachment; filename="employees.csv"'
+        elif export_format == 'xls':
+            content_type = 'application/vnd.ms-excel'
+            response = HttpResponse(dataset.export('xls'), content_type=content_type)
+            response['Content-Disposition'] = 'attachment; filename="employees.xls"'
+        else:
+            return HttpResponse("Unsupported format", status=400)
+        
+        return response
+
+@method_decorator(csrf_exempt, name='dispatch')
+class EmployeeDeleteView(View):
+    def delete(self, request, user_id):
+        try:
+            employee = get_object_or_404(Employee, user_id=user_id)
+            employee.delete()
+            messages.success(request, 'Employee deleted successfully.')
+            return JsonResponse({'message': 'Employee deleted successfully.'}, status=204)
+        except Employee.DoesNotExist:
+            return JsonResponse({'error': 'Employee not found.'}, status=404)
+        

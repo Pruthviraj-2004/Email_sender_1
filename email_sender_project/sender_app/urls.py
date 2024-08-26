@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import AddEmployeeResponseView, AddEmployeeView, ControlPanelView, EmployeeListView, EmployeeResponseView, EmployeeResponsesView, FilterEmployeeResponses, ManageWorking, ManageWorkingDays, SelectMonthYearView, SendConfirmationEmail, SendEmailsToAllEmployees, ViewEmployeeResponseByEmployee, ViewEmployeeResponses, ViewResponsesByMonth
+from .views import AddEmployeeResponseView, AddEmployeeView, ControlPanelView, EmployeeDeleteView, EmployeeExportView, EmployeeListView, EmployeeResponseView, EmployeeResponsesView, FilterEmployeeResponses, ManageWorking, ManageWorkingDays, SelectMonthYearView, SendConfirmationEmail, SendEmailsToAllEmployees, UploadFileView, ViewEmployeeResponseByEmployee, ViewEmployeeResponses, ViewResponsesByMonth
 
 urlpatterns = [
     path('send-email/<int:employee_id>/', SendConfirmationEmail.as_view(), name='send_email'),
@@ -20,5 +20,9 @@ urlpatterns = [
     path('manage-working/<int:year>/<int:month>/', ManageWorking.as_view(), name='manage_working'),
     path('select-month-year/', SelectMonthYearView.as_view(), name='select_month_year'),
 
+    path('upload-file/', UploadFileView.as_view(), name='upload_file'),
+    path('export-employees/', EmployeeExportView.as_view(), name='employee_export'),
+
+    path('employee/delete/<int:user_id>/', EmployeeDeleteView.as_view(), name='employee_delete'),
 
 ]
