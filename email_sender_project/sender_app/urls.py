@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import AddEmployeeResponseView, AddEmployeeView, ControlPanelView, EmployeeDeleteView, EmployeeExportView, EmployeeListView, EmployeeResponseView, EmployeeResponsesView, FilterEmployeeResponses, ManageWorking, ManageWorkingDays, SelectMonthYearView, SendConfirmationEmail, SendCustomEmailsToAllEmployees, SendCustomEmailsYesNoToAllEmployees, SendEmailsToAllEmployees, UploadFileView, ViewEmployeeResponseByEmployee, ViewEmployeeResponses, ViewResponsesByMonth
+from .views import AddEmployeeResponseView, AddEmployeeView, ControlPanelView, EmployeeDeleteView, EmployeeExportView, EmployeeListView, EmployeeResponseView, EmployeeResponsesView, FilterEmployeeResponses, ManageWorking, ManageWorkingDays, SelectMonthYearView, SendConfirmationEmail, SendCustomEmailsToAllEmployees, SendCustomEmailsYesNoToAllEmployees, SendEmailsToAllEmployees, SendSummaryEmail, UploadFileView, ViewEmployeeResponseByEmployee, ViewEmployeeResponses, ViewResponsesByMonth
 
 urlpatterns = [
     path('send-email/<int:employee_id>/', SendConfirmationEmail.as_view(), name='send_email'),
@@ -27,4 +27,7 @@ urlpatterns = [
 
     path('send-custom-yes-no-emails/', SendCustomEmailsYesNoToAllEmployees.as_view(), name='send_custom_yes_no_emails'),
     path('send-custom-emails/', SendCustomEmailsToAllEmployees.as_view(), name='send_custom_emails'),
+    path('send-summary-email/', SendSummaryEmail.as_view(), name='send_summary_email'),
+
+
 ]

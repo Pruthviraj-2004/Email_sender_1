@@ -43,3 +43,37 @@ class WorkingDays(models.Model):
     class Meta:
         verbose_name_plural = "Working Days"
         unique_together = ('month', 'year')
+
+# class EmployeeEventResponse(models.Model):
+#     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+#     date = models.DateField()
+#     response = models.CharField(max_length=3, choices=[('yes', 'Yes'), ('no', 'No')])
+
+#     def __str__(self):
+#         return f"{self.employee.name} - {self.date} - {self.response}"
+    
+#     class Meta:
+#         unique_together = ('employee', 'date')
+
+# class EmailAccount(models.Model):
+#     email = models.EmailField(unique=True)
+#     password = models.CharField(max_length=255)
+#     smtp_server = models.CharField(max_length=255)
+#     smtp_port = models.IntegerField()
+#     use_tls = models.BooleanField(default=True)
+#     use_ssl = models.BooleanField(default=False)
+    
+#     def __str__(self):
+#         return self.email
+    
+# class ManagerEmployee(models.Model):
+#     name = models.CharField(max_length=255)
+#     email = models.EmailField(unique=True)
+#     password = models.CharField(max_length=255)
+#     app_password = models.CharField(max_length=255)
+#     login_count = models.IntegerField(default=0)
+
+#     email_account = models.ForeignKey(EmailAccount, on_delete=models.CASCADE, related_name='manager_employees')
+    
+#     def __str__(self):
+#         return f"{self.name} ({self.email})"    

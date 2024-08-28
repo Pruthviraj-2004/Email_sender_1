@@ -1,4 +1,5 @@
 import json
+from urllib import response
 from django.http import HttpResponse, JsonResponse
 from django.core.mail import send_mail
 from django.template import loader
@@ -79,6 +80,39 @@ class SendEmailsToAllEmployees(View):
         messages.success(request, 'Emails have been successfully sent to all employees.')
         return redirect('control_panel')
 
+class SendSummaryEmail(View):
+    def get(self, request):
+        today = timezone.now().date()
+        responses = EmployeeResponse.objects.filter(date=today)
+        
+        total_responses = responses.count()
+        yes_count = responses.filter(response='yes').count()
+        no_count = responses.filter(response='no').count()
+        
+        html_message = loader.render_to_string(
+            'email_sender_app/summary_message.html',
+            {
+                'title': 'Daily Attendance Summary',
+                'body': f'Attendance summary for {today.strftime("%Y-%m-%d")}:',
+                'total_responses': total_responses,
+                'yes_count': yes_count,
+                'no_count': no_count,
+                'sign': 'Your Manager',
+            }
+        )
+        
+        send_mail(
+            'Daily Attendance Summary',
+            'Here is the summary of today\'s attendance responses.',
+            'photo2pruthvi@gmail.com',  # Replace with your email address
+            ['photo2pruthvi@gmail.com'],  # Replace with the recipient's email address
+            fail_silently=False,
+            html_message=html_message  # Ensure this is correctly placed in the send_mail function
+        )
+
+        messages.success(request, 'Emails have been successfully sent to all employees.')
+        return redirect('control_panel')
+
 class EmployeeResponseView(View):
     def get(self, request, employee_id, response_value):
         employee = get_object_or_404(Employee, pk=employee_id)
@@ -148,8 +182,38 @@ def send_emails_to_all_users():
                 fail_silently=False,
             )
 
+def send_daily_summary_email():
+    today = timezone.now().date()
+    responses = EmployeeResponse.objects.filter(date=today)
+    
+    total_responses = responses.count()
+    yes_count = responses.filter(response='yes').count()
+    no_count = responses.filter(response='no').count()
+    
+    html_message = loader.render_to_string(
+        'email_sender_app/summary_message.html',
+        {
+            'title': 'Daily Attendance Summary',
+            'body': f'Attendance summary for {today.strftime("%Y-%m-%d")}:',
+            'total_responses': total_responses,
+            'yes_count': yes_count,
+            'no_count': no_count,
+            'sign': 'Your Manager',
+        }
+    )
+    
+    send_mail(
+        'Daily Attendance Summary',
+        'Here is the summary of today\'s attendance responses.',
+        'photo2pruthvi@gmail.com',  # Replace with your email address
+        ['photo2pruthvi@gmail.com'],  # Replace with the recipient's email address
+        fail_silently=False,
+        html_message=html_message
+    )
+
 def start_scheduler():
     schedule.every().day.at("11:00").do(send_emails_to_all_users)
+    schedule.every().day.at("11:05").do(send_daily_summary_email)
 
     while True:
         schedule.run_pending()
@@ -617,3 +681,8 @@ class SendCustomEmailsToAllEmployees(View):
             return redirect('control_panel')
         else:
             return render(request, 'email_sender_app/email_form.html', {'form': form})
+
+
+
+    
+    
