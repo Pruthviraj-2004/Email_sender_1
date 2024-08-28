@@ -8,7 +8,7 @@ from .models import Employee, EmployeeResponse, WorkingDays
 from django.utils import timezone
 
 from django.shortcuts import render, redirect
-from .forms import DateForm, EmployeeForm, EmployeeResponseForm, EmployeeSelectForm, FilterResponseForm, WorkingDaysForm
+from .forms import DateForm, EmailForm, EmployeeForm, EmployeeResponseForm, EmployeeSelectForm, FilterResponseForm, WorkingDaysForm
 from django.contrib import messages
 from django.views.generic import View, TemplateView
 
@@ -540,4 +540,80 @@ class EmployeeDeleteView(View):
             return JsonResponse({'message': 'Employee deleted successfully.'}, status=204)
         except Employee.DoesNotExist:
             return JsonResponse({'error': 'Employee not found.'}, status=404)
-        
+
+@method_decorator(csrf_exempt, name='dispatch')
+class SendCustomEmailsYesNoToAllEmployees(View):
+    def get(self, request):
+        form = EmailForm()
+        return render(request, 'email_sender_app/email_form.html', {'form': form})
+
+    def post(self, request):
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            body = form.cleaned_data['body']
+            sign = form.cleaned_data['sign']
+            tomorrow = timezone.now().date() + timezone.timedelta(days=1)
+            employees = Employee.objects.all()
+
+            for employee in employees:
+                html_message = loader.render_to_string(
+                    'email_sender_app/message.html',
+                    {
+                        'title': title,
+                        'body': f'Hello {employee.name},<br><pre>{body}</pre>',
+                        'sign': sign,
+                        'employee_id': employee.user_id,
+                        'date': tomorrow,
+                    })
+
+                send_mail(
+                    title,
+                    body,
+                    'photo2pruthvi@gmail.com',  # Replace with your actual sender email address
+                    [employee.email],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+            messages.success(request, 'Emails have been successfully sent to all employees.')
+            return redirect('control_panel')
+        else:
+            return render(request, 'email_sender_app/email_form.html', {'form': form})
+
+@method_decorator(csrf_exempt, name='dispatch')
+class SendCustomEmailsToAllEmployees(View):
+    def get(self, request):
+        form = EmailForm()
+        return render(request, 'email_sender_app/email_form.html', {'form': form})
+
+    def post(self, request):
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            body = form.cleaned_data['body']
+            sign = form.cleaned_data['sign']
+            employees = Employee.objects.all()
+
+            for employee in employees:
+                formatted_body = body.replace('\n', '<br>').replace(' ', '&nbsp;')
+                html_message = loader.render_to_string(
+                    'email_sender_app/custom_message.html',
+                    {
+                        'title': title,
+                        'body': f'Hello {employee.name},<br>{formatted_body}',  # Preserving new lines and spaces
+                        'sign': sign,
+                        'employee_id': employee.user_id,
+                    })
+                
+                send_mail(
+                    title,
+                    body,
+                    'photo2pruthvi@gmail.com',  # Replace with your actual sender email address
+                    [employee.email],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+            messages.success(request, 'Custom emails have been successfully sent to all employees.')
+            return redirect('control_panel')
+        else:
+            return render(request, 'email_sender_app/email_form.html', {'form': form})

@@ -75,3 +75,18 @@ class WorkingDaysForm(forms.ModelForm):
             'year': forms.NumberInput(attrs={'class': 'form-control'}),
             'days': forms.TextInput(attrs={'class': 'form-control'})
         }
+
+class EmailForm(forms.Form):
+    title = forms.CharField(
+        max_length=128,
+        label='Email Title',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter the email title'})
+    )
+    body = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter the body of the email', 'rows': 5})
+    )
+    sign = forms.CharField(
+        max_length=64,
+        label='Signature',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your signature'})
+    ) 

@@ -37,6 +37,10 @@
         .alert {
             margin-top: 20px; /* Space above alerts for visibility */
         }
+        .form-inline {
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -59,14 +63,16 @@
         {% endif %}
 
         <form action="{% url 'view_responses_month' %}" method="get" class="form-inline mb-4">
-            <label for="monthSelect" class="mr-2">Select Month:</label>
-            <select id="monthSelect" name="month" class="form-control mr-2">
-                {% for month in months %}
-                <option value="{{ month.number|stringformat:"02d" }}" {% if month.number|stringformat:"02d" == selected_month %}selected{% endif %}>
-                    {{ month.name }}
-                </option>
-                {% endfor %}
-            </select>
+            <div class="form-group">
+                <label for="monthSelect" class="mr-2">Select Month:</label>
+                <select id="monthSelect" name="month" class="form-control mr-2">
+                    {% for month in months %}
+                        <option value="{{ month.number|stringformat:"02d" }}" {% if month.number|stringformat:"02d" == selected_month %}selected{% endif %}>
+                            {{ month.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
             <button type="submit" class="btn btn-primary">Show Responses</button>
         </form>
 
