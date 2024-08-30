@@ -1,6 +1,6 @@
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
-from .models import Employee, EmployeeResponse
+from .models import OrganizationEvent, Employee, EmployeeEventResponse, EmployeeResponse
 
 class EmployeeResource(resources.ModelResource):
     # Adding a custom field to show something custom like concatenation of name and email if needed
@@ -50,17 +50,32 @@ class EmployeeResponseResource(resources.ModelResource):
         report_skipped = False
         use_natural_foreign_keys = True
 
-    def dehydrate_employee(self, employee_response):
-        # Returns the email of the employee for the export file.
-        return employee_response.employee.email if employee_response.employee else ''
+class OrganizationEventResource(resources.ModelResource):
+    class Meta:
+        model = OrganizationEvent
+        fields = ('event_id', 'name', 'date', 'created_at', 'updated_at')
+        export_order = ('event_id', 'name', 'date', 'created_at', 'updated_at')
+        import_id_fields = ['event_id']
+        skip_unchanged = True
+        report_skipped = False
 
-    def before_import_row(self, row, **kwargs):
-        # Ensures employee is fetched by email and handles missing or incorrect emails.
-        employee_email = row.get('Employee Email')
-        if employee_email:
-            employee = Employee.objects.filter(email=employee_email).first()
-            if not employee:
-                raise ValueError(f"Employee with email {employee_email} not found")
-            row['employee'] = employee
-        else:
-            raise ValueError("Employee Email is missing or blank in the CSV file")
+class EmployeeEventResponseResource(resources.ModelResource):
+    event = fields.Field(
+        column_name='Event Name',  # Match with CSV header for the event's name
+        attribute='event',
+        widget=ForeignKeyWidget(OrganizationEvent, 'name')
+    )
+    employee = fields.Field(
+        column_name='Employee Email',  # Match with CSV header for the employee's email
+        attribute='employee',
+        widget=ForeignKeyWidget(Employee, 'email')
+    )
+
+    class Meta:
+        model = EmployeeEventResponse
+        fields = ('employee', 'event', 'date', 'response', 'created_at', 'updated_at')
+        export_order = ('employee', 'event', 'date', 'response', 'created_at', 'updated_at')
+        import_id_fields = ['employee', 'event', 'date']
+        skip_unchanged = True
+        report_skipped = False
+        use_natural_foreign_keys = True

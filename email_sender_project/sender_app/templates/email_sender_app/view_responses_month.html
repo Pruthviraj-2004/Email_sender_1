@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% comment %} <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -101,6 +101,155 @@
         {% else %}
             <p>Please select a month to view responses.</p>
         {% endif %}
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html> {% endcomment %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Responses (Month)</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .table {
+            margin-top: 20px;
+        }
+        th {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        .form-inline {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .btn-primary, .btn-secondary {
+            margin-top: 20px;
+        }
+        .alert {
+            margin-top: 20px;
+        }
+        .modal-dialog {
+            max-width: 90%; /* Expands modal width to 90% of the viewport */
+            margin: 30px auto; /* Centers the modal and adds space on top and bottom */
+        }
+        .modal-body {
+            max-height: 80vh; /* Limits the height to 80% of the viewport height */
+            overflow-y: auto; /* Adds scrollbar if content overflows */
+            text-align: center; /* Centers the content in the modal body */
+        }
+        .chart-container img {
+            max-width: 100%; /* Ensures the image covers the width of the modal */
+            height: auto; /* Maintains the aspect ratio */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'control_panel' %}" class="btn btn-secondary mb-3">Back to Control Panel</a>
+        <h1>View Responses (Month)</h1>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form action="{% url 'view_responses_month' %}" method="get" class="form-inline mb-4">
+            <div class="form-group">
+                <label for="monthSelect" class="mr-2">Select Month:</label>
+                <select id="monthSelect" name="month" class="form-control mr-2">
+                    {% for month in months %}
+                        <option value="{{ month.number|stringformat:"02d" }}" {% if month.number|stringformat:"02d" == selected_month %}selected{% endif %}>
+                            {{ month.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Show Responses</button>
+        </form>
+
+        {% if month_name %}
+            <h2>Responses for {{ month_name }}</h2>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#graphModal">View Graph</button>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Total Responses</th>
+                        <th>Yes Count</th>
+                        <th>No Count</th>
+                        <th>Not Responded</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for response in responses %}
+                    <tr>
+                        <td>{{ response.day|date:"M d, Y (l)" }}</td>
+                        <td>{{ response.total }}</td>
+                        <td>{{ response.yes_count }}</td>
+                        <td>{{ response.no_count }}</td>
+                        <td>{{ response.not_responded_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Please select a month to view responses.</p>
+        {% endif %}
+    </div>
+
+    <!-- Modal for displaying the graph -->
+    <div class="modal fade" id="graphModal" tabindex="-1" aria-labelledby="graphModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="graphModalLabel">Response Distribution</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Display the bar chart image -->
+                    <div class="chart-container">
+                        {% if chart_image %}
+                            <img src="data:image/png;base64,{{ chart_image }}" alt="Response Bar Chart">
+                        {% else %}
+                            <p>No data available to display the graph.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Bootstrap JS and dependencies -->

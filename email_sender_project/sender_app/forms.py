@@ -1,6 +1,6 @@
 from django import forms
 from django.utils import timezone
-from .models import EmployeeResponse, Employee, WorkingDays
+from .models import EmployeeEventResponse, EmployeeResponse, Employee, OrganizationEvent, WorkingDays
 
 class EmployeeResponseForm(forms.ModelForm):
     class Meta:
@@ -89,4 +89,45 @@ class EmailForm(forms.Form):
         max_length=64,
         label='Signature',
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your signature'})
-    ) 
+    )
+
+class OrganizationEventForm(forms.ModelForm):
+    class Meta:
+        model = OrganizationEvent
+        fields = ['name', 'date']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'date': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={
+                    'class': 'form-control',
+                    'type': 'date',
+                    'value': timezone.localdate()
+                }
+            ),
+        }
+
+class EmployeeEventResponseForm(forms.ModelForm):
+    class Meta:
+        model = EmployeeEventResponse
+        fields = ['employee', 'event', 'date', 'response']
+        widgets = {
+            'employee': forms.Select(attrs={'class': 'form-control'}),
+            'event': forms.Select(attrs={'class': 'form-control'}),
+            'date': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={
+                    'class': 'form-control',
+                    'type': 'date',
+                    'value': timezone.localdate()
+                }
+            ),
+            'response': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+class EventSelectForm(forms.Form):
+    event = forms.ModelChoiceField(
+        queryset=OrganizationEvent.objects.all(),
+        empty_label="Select an event",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )

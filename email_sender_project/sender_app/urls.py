@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import AddEmployeeResponseView, AddEmployeeView, ControlPanelView, EmployeeDeleteView, EmployeeExportView, EmployeeListView, EmployeeResponseView, EmployeeResponsesView, FilterEmployeeResponses, ManageWorking, ManageWorkingDays, SelectMonthYearView, SendConfirmationEmail, SendCustomEmailsToAllEmployees, SendCustomEmailsYesNoToAllEmployees, SendEmailsToAllEmployees, SendSummaryEmail, UploadFileView, ViewEmployeeResponseByEmployee, ViewEmployeeResponses, ViewResponsesByMonth
+from .views import AddEmployeeResponseView, AddEmployeeView, ControlPanelView, CreateEmployeeEventResponseView, CreateOrganizationEventView, EmployeeDeleteView, EmployeeEventResponseView, EmployeeEventResponsesView, EmployeeExportView, EmployeeListView, EmployeeResponseView, EmployeeResponsesView, FilterEmployeeResponses, ManageWorking, ManageWorkingDays, OrganizationEventListView, SelectMonthYearView, SendConfirmationEmail, SendCustomEmailsToAllEmployees, SendCustomEmailsYesNoToAllEmployees, SendEmailsToAllEmployees, SendEventSummaryEmail, SendSummaryEmail, UploadFileView, ViewEmployeeResponseByEmployee, ViewEmployeeResponses, ViewEventResponses, ViewResponsesByMonth
 
 urlpatterns = [
     path('send-email/<int:employee_id>/', SendConfirmationEmail.as_view(), name='send_email'),
@@ -28,6 +28,14 @@ urlpatterns = [
     path('send-custom-yes-no-emails/', SendCustomEmailsYesNoToAllEmployees.as_view(), name='send_custom_yes_no_emails'),
     path('send-custom-emails/', SendCustomEmailsToAllEmployees.as_view(), name='send_custom_emails'),
     path('send-summary-email/', SendSummaryEmail.as_view(), name='send_summary_email'),
+    
+    path('events/', OrganizationEventListView.as_view(), name='organization_events'),
+    path('event-responses/', EmployeeEventResponsesView.as_view(), name='employee_event_responses'),
+    path('create-event/', CreateOrganizationEventView.as_view(), name='create_event'),
+    path('create-employee-response/', CreateEmployeeEventResponseView.as_view(), name='create_employee_response'),
+    path('view-event-responses/', ViewEventResponses.as_view(), name='view_event_responses'),
+    path('send-event-summary-email/', SendEventSummaryEmail.as_view(), name='send_event_summary_email'),
 
+    path('employee/<int:employee_id>/event/<int:event_id>/response/<str:response_value>/', EmployeeEventResponseView.as_view(), name='employee_event_response'),
 
 ]

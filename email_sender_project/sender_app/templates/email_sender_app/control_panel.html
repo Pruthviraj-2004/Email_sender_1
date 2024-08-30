@@ -38,7 +38,7 @@
                 <a href="{% url 'view_responses' %}" class="list-group-item list-group-item-action">View Responses (Date)</a>
                 <a href="{% url 'view_responses_by_employee' %}" class="list-group-item list-group-item-action">View Responses (Employee)</a>
                 <a href="{% url 'view_responses_month' %}" class="list-group-item list-group-item-action">View Responses (Month)</a>
-                <a href="{% url 'filter_responses' %}" class="list-group-item list-group-item-action">Filtered Responses</a>
+                {% comment %} <a href="{% url 'filter_responses' %}" class="list-group-item list-group-item-action">Filtered Responses</a> {% endcomment %}
             </div>
         </div>
 
@@ -50,6 +50,17 @@
                 <a href="{% url 'send_custom_yes_no_emails' %}" class="list-group-item list-group-item-action">Send CustomEmails to All(Yes Or No)</a>
                 <a href="{% url 'send_custom_emails' %}" class="list-group-item list-group-item-action">Send CustomEmails to All(Content)</a>
                 <a href="{% url 'send_summary_email' %}" class="list-group-item list-group-item-action">Send Daily Summary Email</a>
+            </div>
+        </div>
+
+        <!-- Events Section -->
+        <div class="mt-4 mb-5">
+            <h2>Events</h2>
+            <div class="list-group">
+                <a href="{% url 'organization_events' %}" class="list-group-item list-group-item-action">Events</a>
+                <a href="{% url 'employee_event_responses' %}" class="list-group-item list-group-item-action">All Event Responses</a>
+                <a href="{% url 'view_event_responses' %}" class="list-group-item list-group-item-action">View Event Responses</a>
+                <a href="{% url 'send_event_summary_email' %}" class="list-group-item list-group-item-action">Send Event Summary Email</a> 
             </div>
         </div>
     </div>

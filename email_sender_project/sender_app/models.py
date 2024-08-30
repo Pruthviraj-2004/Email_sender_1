@@ -10,6 +10,8 @@ class Employee(models.Model):
     user_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     email = EncryptedEmailField(max_length=254, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
@@ -18,6 +20,8 @@ class EmployeeResponse(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     date = models.DateField()
     response = models.CharField(max_length=3, choices=[('yes', 'Yes'), ('no', 'No')])
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.employee.name} - {self.date} - {self.response}"
@@ -36,6 +40,8 @@ class WorkingDays(models.Model):
     month = models.IntegerField(choices=MONTH_CHOICES)
     year = models.IntegerField()
     days = models.JSONField(default=list)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.get_month_display()} {self.year}"
@@ -44,16 +50,29 @@ class WorkingDays(models.Model):
         verbose_name_plural = "Working Days"
         unique_together = ('month', 'year')
 
-# class EmployeeEventResponse(models.Model):
-#     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-#     date = models.DateField()
-#     response = models.CharField(max_length=3, choices=[('yes', 'Yes'), ('no', 'No')])
+class OrganizationEvent(models.Model):
+    event_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=32)
+    date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
-#     def __str__(self):
-#         return f"{self.employee.name} - {self.date} - {self.response}"
+    def __str__(self):
+        return f"{self.name} - {self.date}"
+
+class EmployeeEventResponse(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    date = models.DateField()
+    response = models.CharField(max_length=3, choices=[('yes', 'Yes'), ('no', 'No')])
+    event = models.ForeignKey(OrganizationEvent, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.employee.name} - {self.event.name} - {self.date} - {self.response}"
     
-#     class Meta:
-#         unique_together = ('employee', 'date')
+    class Meta:
+        unique_together = ('employee', 'date', 'event')
 
 # class EmailAccount(models.Model):
 #     email = models.EmailField(unique=True)
@@ -72,6 +91,8 @@ class WorkingDays(models.Model):
 #     password = models.CharField(max_length=255)
 #     app_password = models.CharField(max_length=255)
 #     login_count = models.IntegerField(default=0)
+# created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
 
 #     email_account = models.ForeignKey(EmailAccount, on_delete=models.CASCADE, related_name='manager_employees')
     
