@@ -131,3 +131,24 @@ class EventSelectForm(forms.Form):
         empty_label="Select an event",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+
+class EventEmailForm(forms.Form):
+    title = forms.CharField(
+        max_length=128,
+        label='Email Title',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter the email title'})
+    )
+    body = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter the body of the email', 'rows': 5})
+    )
+    sign = forms.CharField(
+        max_length=64,
+        label='Signature',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your signature'})
+    )
+    event = forms.ModelChoiceField(
+        queryset=OrganizationEvent.objects.all(),
+        label='Select Event',
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        empty_label="Select an event"
+    )

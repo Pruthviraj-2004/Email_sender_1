@@ -9,7 +9,7 @@ from .models import Employee, EmployeeEventResponse, EmployeeResponse, Organizat
 from django.utils import timezone
 
 from django.shortcuts import render, redirect
-from .forms import DateForm, EmailForm, EmployeeEventResponseForm, EmployeeForm, EmployeeResponseForm, EmployeeSelectForm, EventSelectForm, FilterResponseForm, OrganizationEventForm, WorkingDaysForm
+from .forms import DateForm, EmailForm, EmployeeEventResponseForm, EmployeeForm, EmployeeResponseForm, EmployeeSelectForm, EventEmailForm, EventSelectForm, FilterResponseForm, OrganizationEventForm, WorkingDaysForm
 from django.contrib import messages
 from django.views.generic import View, TemplateView
 
@@ -668,75 +668,6 @@ class FilterEmployeeResponses(View):
 #             'selected_month': month
 #         })
 
-# class ViewResponsesByMonth(View):
-#     template_name = 'email_sender_app/view_responses_month.html'
-
-#     def get(self, request):
-#         current_month = timezone.now().strftime('%m')
-#         month = request.GET.get('month', current_month)
-#         responses_data = {}
-#         month_name_str = ""
-#         month_name = {1: "January", 2: "February", 3: "March", 4: "April", 5: "May", 6: "June",
-#                       7: "July", 8: "August", 9: "September", 10: "October", 11: "November", 12: "December"}
-
-#         months = [{'number': i, 'name': month_name[i]} for i in range(1, 13)]
-
-#         if month:
-#             month_index = int(month)
-#             month_name_str = month_name[month_index]
-
-#             responses_data = (EmployeeResponse.objects
-#                               .filter(date__month=month, date__year=timezone.now().year)
-#                               .annotate(day=TruncDay('date'))
-#                               .values('day')
-#                               .annotate(
-#                                   total=Count('id'),
-#                                   yes_count=Count(Case(When(response='yes', then=1), output_field=IntegerField())),
-#                                   no_count=Count(Case(When(response='no', then=1), output_field=IntegerField()))
-#                               )
-#                               .order_by('day'))
-
-#             messages.success(request, f"Displaying responses for {month_name_str}.")
-
-#             total_employees = Employee.objects.count()
-
-#             days = [data['day'].strftime('%Y-%m-%d') for data in responses_data]
-#             yes_counts = [data['yes_count'] for data in responses_data]
-#             no_counts = [data['no_count'] for data in responses_data]
-#             not_responded_counts = [total_employees - (yes + no) for yes, no in zip(yes_counts, no_counts)]
-
-#             plt.figure(figsize=(10, 6))
-#             bar_width = 0.2
-#             index = range(len(days))
-            
-#             plt.bar(index, yes_counts, width=bar_width, color='#28a745', label='Yes')
-#             plt.bar([i + bar_width for i in index], no_counts, width=bar_width, color='#dc3545', label='No')
-#             plt.bar([i + 2 * bar_width for i in index], not_responded_counts, width=bar_width, color='#ffc107', label='Not Responded')
-            
-#             plt.xlabel('Day')
-#             plt.ylabel('Number of Responses')
-#             plt.title(f'Response Distribution for {month_name_str}')
-#             plt.xticks([i + bar_width for i in index], days, rotation=45)
-#             plt.legend()
-#             plt.tight_layout()
-
-#             # Save the chart to a BytesIO object
-#             buffer = BytesIO()
-#             plt.savefig(buffer, format='png')
-#             plt.close()
-#             buffer.seek(0)
-
-#             # Encode the image to base64 string
-#             image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
-
-#         return render(request, self.template_name, {
-#             'months': months,
-#             'responses': responses_data,
-#             'month_name': month_name_str,
-#             'selected_month': month,
-#             'chart_image': image_base64 if month else None
-#         })
-
 class ViewResponsesByMonth(View):
     template_name = 'email_sender_app/view_responses_month.html'
 
@@ -768,43 +699,12 @@ class ViewResponsesByMonth(View):
                               )
                               .order_by('day'))
 
-            # Add not_responded_count to each response entry
             for data in responses_data:
                 data['not_responded_count'] = total_employees - (data['yes_count'] + data['no_count'])
 
             messages.success(request, f"Displaying responses for {month_name_str}.")
 
             # Plotting code (if necessary) would go here...
-
-            # # Example plotting code for a grouped bar chart:
-            # days = [data['day'].strftime('%Y-%m-%d') for data in responses_data]
-            # yes_counts = [data['yes_count'] for data in responses_data]
-            # no_counts = [data['no_count'] for data in responses_data]
-            # not_responded_counts = [data['not_responded_count'] for data in responses_data]
-
-            # plt.figure(figsize=(10, 6))
-            # bar_width = 0.2
-            # index = range(len(days))
-
-            # plt.bar(index, yes_counts, width=bar_width, color='#28a745', label='Yes')
-            # plt.bar([i + bar_width for i in index], no_counts, width=bar_width, color='#dc3545', label='No')
-            # plt.bar([i + 2 * bar_width for i in index], not_responded_counts, width=bar_width, color='#ffc107', label='Not Responded')
-
-            # plt.xlabel('Day')
-            # plt.ylabel('Number of Responses')
-            # plt.title(f'Response Distribution for {month_name_str}')
-            # plt.xticks([i + bar_width for i in index], days, rotation=45)
-            # plt.legend()
-            # plt.tight_layout()
-
-            # # Save the chart to a BytesIO object
-            # buffer = BytesIO()
-            # plt.savefig(buffer, format='png')
-            # plt.close()
-            # buffer.seek(0)
-
-            # # Encode the image to base64 string
-            # image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
             # Example plotting code for a stacked bar chart:
             days = [data['day'].strftime('%Y-%m-%d') for data in responses_data]
@@ -1032,30 +932,71 @@ class EmployeeDeleteView(View):
         except Employee.DoesNotExist:
             return JsonResponse({'error': 'Employee not found.'}, status=404)
 
+# @method_decorator(csrf_exempt, name='dispatch')
+# class SendCustomEmailsYesNoToAllEmployees(View):
+#     def get(self, request):
+#         form = EmailForm()
+#         return render(request, 'email_sender_app/email_form.html', {'form': form})
+
+#     def post(self, request):
+#         form = EmailForm(request.POST)
+#         if form.is_valid():
+#             title = form.cleaned_data['title']
+#             body = form.cleaned_data['body']
+#             sign = form.cleaned_data['sign']
+#             tomorrow = timezone.now().date() + timezone.timedelta(days=1)
+#             employees = Employee.objects.all()
+
+#             for employee in employees:
+#                 html_message = loader.render_to_string(
+#                     'email_sender_app/event_message.html',
+#                     {
+#                         'title': title,
+#                         'body': f'Hello {employee.name},<br><pre>{body}</pre>',
+#                         'sign': sign,
+#                         'employee_id': employee.user_id,
+#                         'date': tomorrow,
+#                     })
+
+#                 send_mail(
+#                     title,
+#                     body,
+#                     'photo2pruthvi@gmail.com',  # Replace with your actual sender email address
+#                     [employee.email],
+#                     html_message=html_message,
+#                     fail_silently=False,
+#                 )
+#             messages.success(request, 'Emails have been successfully sent to all employees.')
+#             return redirect('control_panel')
+#         else:
+#             return render(request, 'email_sender_app/email_form.html', {'form': form})
+
 @method_decorator(csrf_exempt, name='dispatch')
 class SendCustomEmailsYesNoToAllEmployees(View):
     def get(self, request):
-        form = EmailForm()
-        return render(request, 'email_sender_app/email_form.html', {'form': form})
+        form = EventEmailForm()
+        return render(request, 'email_sender_app/event_email_form.html', {'form': form})
 
     def post(self, request):
-        form = EmailForm(request.POST)
+        form = EventEmailForm(request.POST)
         if form.is_valid():
             title = form.cleaned_data['title']
             body = form.cleaned_data['body']
             sign = form.cleaned_data['sign']
-            tomorrow = timezone.now().date() + timezone.timedelta(days=1)
+            selected_event = form.cleaned_data['event']  # Get the selected event from the form
+
             employees = Employee.objects.all()
 
             for employee in employees:
                 html_message = loader.render_to_string(
-                    'email_sender_app/message.html',
+                    'email_sender_app/event_message.html',
                     {
                         'title': title,
                         'body': f'Hello {employee.name},<br><pre>{body}</pre>',
                         'sign': sign,
                         'employee_id': employee.user_id,
-                        'date': tomorrow,
+                        'event_id': selected_event.event_id,  # Use the selected event ID
+                        'date': selected_event.date,
                     })
 
                 send_mail(
@@ -1069,7 +1010,7 @@ class SendCustomEmailsYesNoToAllEmployees(View):
             messages.success(request, 'Emails have been successfully sent to all employees.')
             return redirect('control_panel')
         else:
-            return render(request, 'email_sender_app/email_form.html', {'form': form})
+            return render(request, 'email_sender_app/event_email_form.html', {'form': form})
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SendCustomEmailsToAllEmployees(View):
