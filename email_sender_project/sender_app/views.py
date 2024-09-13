@@ -199,7 +199,7 @@ class EmployeeEventResponseView(View):
 
         return HttpResponse("Invalid response.", status=400)
 
-scheduler_thread = None
+# scheduler_thread = None
 
 # def send_emails_to_all_users():
 #     tomorrow = timezone.now().date() + timezone.timedelta(days=1)
@@ -224,119 +224,52 @@ scheduler_thread = None
 #             fail_silently=False,
 #         )
 
-def send_emails_to_all_users():
-    tomorrow = timezone.now() + timezone.timedelta(days=1)
-    # .weekday() returns the day of the week as an integer, where Monday is 0 and Sunday is 6
-    if tomorrow.weekday() in [0, 1, 2, 3, 6]:  # Monday to Thursday and Sunday
-        employees = Employee.objects.all()
-        for employee in employees:
-            html_message = loader.render_to_string(
-                'email_sender_app/message.html',
-                {
-                    'title': 'Office Attendance Confirmation',
-                    'body': f'Hello {employee.name}, this email is to verify whether you will attend the office tomorrow. Please confirm your attendance.',
-                    'sign': 'Your Manager',
-                    'employee_id': employee.user_id,
-                    'date': tomorrow.date(),
-                })
-
-            send_mail(
-                'Will You Attend the Office Tomorrow?',
-                'Please confirm your attendance for tomorrow.',
-                'photo2pruthvi@gmail.com',  # Replace with your actual sender email address
-                [employee.email],
-                html_message=html_message,
-                fail_silently=False,
-            )
-
-def send_daily_summary_email():
-    today = timezone.now().date()
-    responses = EmployeeResponse.objects.filter(date=today)
+# def send_daily_summary_email():
+#     today = timezone.now().date()
+#     responses = EmployeeResponse.objects.filter(date=today)
     
-    total_responses = responses.count()
-    yes_count = responses.filter(response='yes').count()
-    no_count = responses.filter(response='no').count()
+#     total_responses = responses.count()
+#     yes_count = responses.filter(response='yes').count()
+#     no_count = responses.filter(response='no').count()
     
-    html_message = loader.render_to_string(
-        'email_sender_app/summary_message.html',
-        {
-            'title': 'Daily Attendance Summary',
-            'body': f'Attendance summary for {today.strftime("%Y-%m-%d")}:',
-            'total_responses': total_responses,
-            'yes_count': yes_count,
-            'no_count': no_count,
-            'sign': 'Your Manager',
-        }
-    )
+#     html_message = loader.render_to_string(
+#         'email_sender_app/summary_message.html',
+#         {
+#             'title': 'Daily Attendance Summary',
+#             'body': f'Attendance summary for {today.strftime("%Y-%m-%d")}:',
+#             'total_responses': total_responses,
+#             'yes_count': yes_count,
+#             'no_count': no_count,
+#             'sign': 'Your Manager',
+#         }
+#     )
     
-    send_mail(
-        'Daily Attendance Summary',
-        'Here is the summary of today\'s attendance responses.',
-        'photo2pruthvi@gmail.com',  # Replace with your email address
-        ['photo2pruthvi@gmail.com'],  # Replace with the recipient's email address
-        fail_silently=False,
-        html_message=html_message
-    )
-
-def start_scheduler():
-    schedule.every().day.at("11:00").do(send_emails_to_all_users)
-    schedule.every().day.at("11:05").do(send_daily_summary_email)
-
-    while True:
-        schedule.run_pending()
-        time.sleep(10)  # Sleep for 10 seconds to reduce CPU usage
-
-def start_scheduler_thread():
-    global scheduler_thread
-    if scheduler_thread is None or not scheduler_thread.is_alive():
-        scheduler_thread = threading.Thread(target=start_scheduler)
-        scheduler_thread.daemon = True  # Ensure the thread exits when the main program does
-        scheduler_thread.start()
-
-# Start the scheduler thread
-start_scheduler_thread()
-
-# def send_emails_to_all_usersss():
-#     tomorrow = timezone.now().date() + timezone.timedelta(days=1)
-#     month = tomorrow.month
-#     year = tomorrow.year
-
-#     try:
-#         # Retrieve the working days entry for the month and year of tomorrow's date
-#         working_days = WorkingDays.objects.get(month=month, year=year)
-#         if tomorrow.day in working_days.days:  # Check if tomorrow is a working day
-#             employees = Employee.objects.all()
-#             for employee in employees:
-#                 html_message = loader.render_to_string(
-#                     'email_sender_app/message.html',
-#                     {
-#                         'title': 'Office Attendance Confirmation',
-#                         'body': f'Hello {employee.name}, this email is to verify whether you will attend the office tomorrow. Please confirm your attendance.',
-#                         'sign': 'Your Manager',
-#                         'employee_id': employee.user_id,
-#                         'date': tomorrow,
-#                     })
-
-#                 send_mail(
-#                     'Will You Attend the Office Tomorrow?',
-#                     'Please confirm your attendance for tomorrow.',
-#                     'photo2pruthvi@gmail.com',  # Replace with your actual sender email address
-#                     [employee.email],
-#                     html_message=html_message,
-#                     fail_silently=False,
-#                 )
-#     except WorkingDays.DoesNotExist:
-#         print("No working days configuration found for the specified month and year.")
+#     send_mail(
+#         'Daily Attendance Summary',
+#         'Here is the summary of today\'s attendance responses.',
+#         'photo2pruthvi@gmail.com',  # Replace with your email address
+#         ['photo2pruthvi@gmail.com'],  # Replace with the recipient's email address
+#         fail_silently=False,
+#         html_message=html_message
+#     )
 
 # def start_scheduler():
-#     import schedule
-#     import time
-
-#     schedule.every().day.at("00:05").do(send_emails_to_all_usersss)
+#     schedule.every().day.at("11:00").do(send_emails_to_all_users)
+#     schedule.every().day.at("11:05").do(send_daily_summary_email)
 
 #     while True:
 #         schedule.run_pending()
-#         time.sleep(10) 
+#         time.sleep(10)  # Sleep for 10 seconds to reduce CPU usage
+
+# def start_scheduler_thread():
+#     global scheduler_thread
+#     if scheduler_thread is None or not scheduler_thread.is_alive():
+#         scheduler_thread = threading.Thread(target=start_scheduler)
+#         scheduler_thread.daemon = True  # Ensure the thread exits when the main program does
+#         scheduler_thread.start()
+
+# # Start the scheduler thread
+# start_scheduler_thread()
 
 class ControlPanelView(TemplateView):
     template_name = 'email_sender_app/control_panel.html'
@@ -1050,7 +983,3 @@ class SendCustomEmailsToAllEmployees(View):
         else:
             return render(request, 'email_sender_app/email_form.html', {'form': form})
 
-
-
-    
-    
