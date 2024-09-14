@@ -2,14 +2,14 @@ from django.core.management.base import BaseCommand
 from django.core.mail import send_mail
 from django.template import loader
 from django.utils import timezone
-from sender_app.models import Employee, EmployeeResponse, WorkingDays  # Replace with your model
+from sender_app.models import Employee, EmployeeResponse, WorkingDays
 
 class Command(BaseCommand):
     help = 'Send daily emails to all users'
 
     def handle(self, *args, **kwargs):
-        self.send_emails_to_all_users()
         self.send_daily_summary_email()
+        self.send_emails_to_all_users()
 
     def send_emails_to_all_users(self):
         tomorrow = timezone.now().date() + timezone.timedelta(days=1)  # Get tomorrow's date

@@ -1,38 +1,28 @@
 import json
-from urllib import response
 from django.http import HttpResponse, JsonResponse
 from django.core.mail import send_mail
 from django.template import loader
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 from .models import Employee, EmployeeEventResponse, EmployeeResponse, OrganizationEvent, WorkingDays
 from django.utils import timezone
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import DateForm, EmailForm, EmployeeEventResponseForm, EmployeeForm, EmployeeResponseForm, EmployeeSelectForm, EventEmailForm, EventSelectForm, FilterResponseForm, OrganizationEventForm, WorkingDaysForm
 from django.contrib import messages
 from django.views.generic import View, TemplateView
 
-import schedule
-import time
-import threading
-from django.core.mail import send_mail
-from django.template import loader
-
-from django.db.models import Count
+from django.db.models import Count, Case, When, IntegerField
 from django.db.models.functions import TruncDay
 
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from datetime import datetime
 
-from django.db.models import Count, Case, When, IntegerField
-
 from tablib import Dataset
 from .resources import EmployeeResource
 
 import matplotlib
 matplotlib.use('Agg') 
+
 from io import BytesIO
 import base64
 import matplotlib.pyplot as plt
@@ -113,7 +103,7 @@ class SendSummaryEmail(View):
             'photo2pruthvi@gmail.com',  # Replace with your email address
             ['photo2pruthvi@gmail.com'],  # Replace with the recipient's email address
             fail_silently=False,
-            html_message=html_message  # Ensure this is correctly placed in the send_mail function
+            html_message=html_message
         )
 
         messages.success(request, 'Emails have been successfully sent to all employees.')
@@ -123,7 +113,6 @@ class SendEventSummaryEmail(View):
     def get(self, request):
         today = timezone.now().date()
         
-        # Find the nearest upcoming event
         upcoming_event = OrganizationEvent.objects.filter(date__gte=today).order_by('date').first()
         
         if upcoming_event:
@@ -150,7 +139,7 @@ class SendEventSummaryEmail(View):
                 'photo2pruthvi@gmail.com',  # Replace with your email address
                 ['photo2pruthvi@gmail.com'],  # Replace with the recipient's email address
                 fail_silently=False,
-                html_message=html_message  # Ensure this is correctly placed in the send_mail function
+                html_message=html_message
             )
 
             messages.success(request, f'Emails have been successfully sent for the upcoming event: {upcoming_event.name}')
@@ -198,78 +187,6 @@ class EmployeeEventResponseView(View):
             return HttpResponse(f"Thank you, {employee.name}, for your response to the event {event.name}!")
 
         return HttpResponse("Invalid response.", status=400)
-
-# scheduler_thread = None
-
-# def send_emails_to_all_users():
-#     tomorrow = timezone.now().date() + timezone.timedelta(days=1)
-#     employees = Employee.objects.all()
-#     for employee in employees:
-#         html_message = loader.render_to_string(
-#             'email_sender_app/message.html',
-#             {
-#                 'title': 'Office Attendance Confirmation',
-#                 'body': f'Hello {employee.name}, this email is to verify whether you will attend the office tomorrow. Please confirm your attendance.',
-#                 'sign': 'Your Manager',
-#                 'employee_id': employee.user_id,
-#                 'date': tomorrow ,
-#             })
-
-#         send_mail(
-#             'Will You Attend the Office Tomorrow?',
-#             'Please confirm your attendance for tomorrow.',
-#             'photo2pruthvi@gmail.com',  # Replace with your email address
-#             [employee.email],
-#             html_message=html_message,
-#             fail_silently=False,
-#         )
-
-# def send_daily_summary_email():
-#     today = timezone.now().date()
-#     responses = EmployeeResponse.objects.filter(date=today)
-    
-#     total_responses = responses.count()
-#     yes_count = responses.filter(response='yes').count()
-#     no_count = responses.filter(response='no').count()
-    
-#     html_message = loader.render_to_string(
-#         'email_sender_app/summary_message.html',
-#         {
-#             'title': 'Daily Attendance Summary',
-#             'body': f'Attendance summary for {today.strftime("%Y-%m-%d")}:',
-#             'total_responses': total_responses,
-#             'yes_count': yes_count,
-#             'no_count': no_count,
-#             'sign': 'Your Manager',
-#         }
-#     )
-    
-#     send_mail(
-#         'Daily Attendance Summary',
-#         'Here is the summary of today\'s attendance responses.',
-#         'photo2pruthvi@gmail.com',  # Replace with your email address
-#         ['photo2pruthvi@gmail.com'],  # Replace with the recipient's email address
-#         fail_silently=False,
-#         html_message=html_message
-#     )
-
-# def start_scheduler():
-#     schedule.every().day.at("11:00").do(send_emails_to_all_users)
-#     schedule.every().day.at("11:05").do(send_daily_summary_email)
-
-#     while True:
-#         schedule.run_pending()
-#         time.sleep(10)  # Sleep for 10 seconds to reduce CPU usage
-
-# def start_scheduler_thread():
-#     global scheduler_thread
-#     if scheduler_thread is None or not scheduler_thread.is_alive():
-#         scheduler_thread = threading.Thread(target=start_scheduler)
-#         scheduler_thread.daemon = True  # Ensure the thread exits when the main program does
-#         scheduler_thread.start()
-
-# # Start the scheduler thread
-# start_scheduler_thread()
 
 class ControlPanelView(TemplateView):
     template_name = 'email_sender_app/control_panel.html'
@@ -337,7 +254,7 @@ class CreateOrganizationEventView(View):
         form = OrganizationEventForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('organization_events')  # Redirect to a list of events or another relevant page
+            return redirect('organization_events')
         return render(request, 'email_sender_app/create_event.html', {'form': form})
 
 class CreateEmployeeEventResponseView(View):
@@ -349,7 +266,7 @@ class CreateEmployeeEventResponseView(View):
         form = EmployeeEventResponseForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('employee_event_responses')  # Redirect to a list of responses or another relevant page
+            return redirect('employee_event_responses')
         return render(request, 'email_sender_app/create_employee_response.html', {'form': form})
 
 # class ViewEmployeeResponses(View):
@@ -864,45 +781,6 @@ class EmployeeDeleteView(View):
             return JsonResponse({'message': 'Employee deleted successfully.'}, status=204)
         except Employee.DoesNotExist:
             return JsonResponse({'error': 'Employee not found.'}, status=404)
-
-# @method_decorator(csrf_exempt, name='dispatch')
-# class SendCustomEmailsYesNoToAllEmployees(View):
-#     def get(self, request):
-#         form = EmailForm()
-#         return render(request, 'email_sender_app/email_form.html', {'form': form})
-
-#     def post(self, request):
-#         form = EmailForm(request.POST)
-#         if form.is_valid():
-#             title = form.cleaned_data['title']
-#             body = form.cleaned_data['body']
-#             sign = form.cleaned_data['sign']
-#             tomorrow = timezone.now().date() + timezone.timedelta(days=1)
-#             employees = Employee.objects.all()
-
-#             for employee in employees:
-#                 html_message = loader.render_to_string(
-#                     'email_sender_app/event_message.html',
-#                     {
-#                         'title': title,
-#                         'body': f'Hello {employee.name},<br><pre>{body}</pre>',
-#                         'sign': sign,
-#                         'employee_id': employee.user_id,
-#                         'date': tomorrow,
-#                     })
-
-#                 send_mail(
-#                     title,
-#                     body,
-#                     'photo2pruthvi@gmail.com',  # Replace with your actual sender email address
-#                     [employee.email],
-#                     html_message=html_message,
-#                     fail_silently=False,
-#                 )
-#             messages.success(request, 'Emails have been successfully sent to all employees.')
-#             return redirect('control_panel')
-#         else:
-#             return render(request, 'email_sender_app/email_form.html', {'form': form})
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SendCustomEmailsYesNoToAllEmployees(View):
